@@ -116,6 +116,69 @@ defmodule TricitiesEvents.ICalTest do
       assert ics =~ "END:VCALENDAR"
     end
 
+    test "prefixes SUMMARY with a short org tag for known sources" do
+      events = [
+        %TricitiesEvents.Event{
+          uid: "1@x.com",
+          source: "Elizabethton Chamber",
+          summary: "Members Breakfast",
+          starts_at: ~U[2026-05-05 14:00:00Z]
+        }
+      ]
+
+      ics = ICal.generate(events)
+      assert ics =~ "SUMMARY:[Eliz Chamber] Members Breakfast"
+    end
+
+    test "does not tag Custom-source events (user-curated summaries)" do
+      events = [
+        %TricitiesEvents.Event{
+          uid: "2@x.com",
+          source: "Custom",
+          summary: "BANQ Networking",
+          starts_at: ~U[2026-05-05 14:00:00Z]
+        }
+      ]
+
+      ics = ICal.generate(events)
+      assert ics =~ "SUMMARY:BANQ Networking"
+      refute ics =~ "[Custom]"
+    end
+
+    test "tags passthrough vevent_blocks by rewriting the SUMMARY line" do
+      raw_block =
+        "BEGIN:VEVENT\r\nDTSTART:20260505T140000Z\r\nUID:p@x.com\r\nSUMMARY:Members Breakfast\r\nX-MARKER:preserved\r\nEND:VEVENT"
+
+      events = [
+        %TricitiesEvents.Event{
+          uid: "p@x.com",
+          source: "Incredible Towns",
+          summary: "Members Breakfast",
+          starts_at: ~U[2026-05-05 14:00:00Z],
+          vevent_block: raw_block
+        }
+      ]
+
+      ics = ICal.generate(events)
+      assert ics =~ "SUMMARY:[Incredible Towns] Members Breakfast"
+      assert ics =~ "X-MARKER:preserved"
+    end
+
+    test "is idempotent — does not double-tag an already-tagged summary" do
+      events = [
+        %TricitiesEvents.Event{
+          uid: "3@x.com",
+          source: "Elizabethton Chamber",
+          summary: "[Eliz Chamber] Members Breakfast",
+          starts_at: ~U[2026-05-05 14:00:00Z]
+        }
+      ]
+
+      ics = ICal.generate(events)
+      refute ics =~ "[Eliz Chamber] [Eliz Chamber]"
+      assert ics =~ "SUMMARY:[Eliz Chamber] Members Breakfast"
+    end
+
     test "uses raw vevent_block when available" do
       raw_block =
         "BEGIN:VEVENT\r\nDTSTART:20260505T140000Z\r\nUID:raw@x.com\r\nSUMMARY:Raw\r\nX-MARKER:preserved\r\nEND:VEVENT"

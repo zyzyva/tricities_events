@@ -15,6 +15,17 @@ defmodule TricitiesEvents.ICal do
 
   @prodid "-//TricitiesEvents//Aggregator//EN"
 
+  # Short, calendar-list-friendly aliases prepended to event summaries so
+  # subscribers can tell at a glance which org is hosting. Sources not in
+  # this map (notably "Custom") are not tagged — Custom event summaries
+  # are user-curated and already self-describing.
+  @source_tags %{
+    "Elizabethton Chamber" => "Eliz Chamber",
+    "Incredible Towns" => "Incredible Towns",
+    "Unicoi County Chamber" => "Unicoi Chamber",
+    "FoundersForge" => "Founders Forge"
+  }
+
   @doc "Parse a raw iCal document into a list of %Event{} structs."
   def parse(ics, source_name) do
     ics
@@ -177,18 +188,21 @@ defmodule TricitiesEvents.ICal do
 
   # --- generation ---
 
-  defp event_to_vevent(%Event{vevent_block: block}) when is_binary(block) and block != "" do
-    block
+  defp event_to_vevent(%Event{vevent_block: block, source: source})
+       when is_binary(block) and block != "" do
+    apply_tag_to_block(block, Map.get(@source_tags, source))
   end
 
   defp event_to_vevent(%Event{} = event) do
+    tagged_summary = apply_tag(event.summary, Map.get(@source_tags, event.source))
+
     lines = [
       "BEGIN:VEVENT",
       "UID:#{event.uid}",
       "DTSTAMP:#{format_utc(DateTime.utc_now())}",
       "DTSTART:#{format_utc(event.starts_at)}",
       maybe("DTEND", event.ends_at && format_utc(event.ends_at)),
-      "SUMMARY:#{escape(event.summary)}",
+      "SUMMARY:#{escape(tagged_summary)}",
       maybe("DESCRIPTION", event.description && escape(event.description)),
       maybe("LOCATION", event.location && escape(event.location)),
       maybe("URL", event.url),
@@ -199,6 +213,31 @@ defmodule TricitiesEvents.ICal do
     lines
     |> Enum.reject(&is_nil/1)
     |> Enum.join("\r\n")
+  end
+
+  defp apply_tag(summary, nil), do: summary
+
+  defp apply_tag(summary, tag) do
+    prefix = "[#{tag}] "
+    if String.starts_with?(summary, prefix), do: summary, else: prefix <> summary
+  end
+
+  # Rewrite the SUMMARY line of a passthrough VEVENT block to prepend the
+  # org tag. SUMMARY lines may carry RFC 5545 parameters (e.g.
+  # `SUMMARY;LANGUAGE=en:Foo`) so we match on the property name + any
+  # parameters, then prepend the tag to the value.
+  defp apply_tag_to_block(block, nil), do: block
+
+  defp apply_tag_to_block(block, tag) do
+    prefix = "[#{tag}] "
+
+    Regex.replace(
+      ~r/^(SUMMARY(?:;[^:\r\n]*)?:)(.*)$/m,
+      block,
+      fn _full, head, value ->
+        if String.starts_with?(value, prefix), do: head <> value, else: head <> prefix <> value
+      end
+    )
   end
 
   defp maybe(_key, nil), do: nil
