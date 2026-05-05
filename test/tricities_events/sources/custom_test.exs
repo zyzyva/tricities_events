@@ -128,6 +128,31 @@ defmodule TricitiesEvents.Sources.CustomTest do
       assert Date.compare(DateTime.to_date(latest.starts_at), ~D[2099-01-31]) in [:lt, :eq]
     end
 
+    test "preserves local wall-clock time across DST transitions" do
+      # Weekly Tuesday at 9:00 AM ET starting in EDT (June). Within the
+      # ~365-day horizon we should see both EDT (June, UTC-4 → 13:00 UTC)
+      # and EST (December, UTC-5 → 14:00 UTC) instances.
+      path =
+        write_tmp(~s({
+          "events": [
+            {
+              "summary": "DST stability check",
+              "starts_at": "2099-06-02T09:00",
+              "duration_minutes": 60,
+              "recurrence": {"freq": "weekly", "byday": ["TU"], "count": 40}
+            }
+          ]
+        }))
+
+      {:ok, events} = Custom.fetch_from(path)
+
+      summer = Enum.find(events, &(&1.starts_at.month in 6..7))
+      winter = Enum.find(events, &(&1.starts_at.month in 12..12))
+
+      assert summer.starts_at.hour == 13, "EDT 09:00 should be 13:00 UTC"
+      assert winter.starts_at.hour == 14, "EST 09:00 should be 14:00 UTC"
+    end
+
     test "produces stable UIDs across runs for the same spec" do
       json = ~s({
         "events": [

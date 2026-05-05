@@ -28,26 +28,179 @@
   ],
   "events": [
     {
-      "summary": "Eggs & Issues — Kingsport Chamber breakfast",
-      "location": "MeadowView Conference Resort & Convention Center, Kingsport, TN",
-      "description": "Monthly Kingsport Chamber breakfast featuring local and regional speakers.",
-      "starts_at": "2026-05-21T07:30",
-      "duration_minutes": 90,
-      "recurrence": {
-        "freq": "monthly",
-        "byday": "3TH"
-      }
+      "summary": "IBN Breakfast Club — Johnson City TN (North)",
+      "location": "The Toasted Yolk, Johnson City, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T09:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "1MO"}
     },
     {
-      "summary": "Tri-Cities Founders Coffee",
-      "location": "Dunkin', Johnson City",
-      "description": "Informal weekly coffee meetup for founders and operators in the Tri-Cities region.",
-      "starts_at": "2026-05-13T07:30",
+      "summary": "IBN Breakfast Club — Bristol VA",
+      "location": "Vivian's Table, The Bristol Hotel, 115 Country Music Way, Bristol, VA",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T09:00",
       "duration_minutes": 60,
-      "recurrence": {
-        "freq": "weekly",
-        "byday": ["WE"]
-      }
+      "recurrence": {"freq": "monthly", "byday": "2FR"}
+    },
+    {
+      "summary": "IBN Breakfast Club — Johnson City TN (Downtown)",
+      "location": "Jeremiah Cafe, Johnson City, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T09:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "3TU"}
+    },
+    {
+      "summary": "IBN Coffee Connection — Greeneville TN",
+      "location": "Peggy Ann Bakery, Greeneville, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T08:30",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "1FR"}
+    },
+    {
+      "summary": "IBN Coffee Connection — Abingdon VA",
+      "location": "Wolf Hills Coffee, Abingdon, VA",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T09:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "3TU"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Jonesborough TN",
+      "location": "The Black Olive, 125 E. Jackson Blvd, Jonesborough, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "1WE"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Bristol VA",
+      "location": "Cheddar's Scratch Kitchen, 1545 Old Airport Road, Bristol, VA",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "1TH"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Johnson City TN (South)",
+      "location": "Miso Teriyaki House, 1827 W State of Franklin Rd, Johnson City, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "2TU"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Mountain City TN",
+      "location": "Local's Deli, Mountain City, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "2TU"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Elizabethton TN",
+      "location": "Puerto Nuevo Fresh Mex & Seafood, Elizabethton, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "2WE"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Kingsport TN",
+      "location": "Cancun Family Mexican Restaurant, Kingsport, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "2TH"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Greeneville TN",
+      "location": "Casa Guerrero Mexican Cuisine #1, Greeneville, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "3TU"}
+    },
+    {
+      "summary": "IBN Biz Lunch — Johnson City TN (North)",
+      "location": "Golden Corral, Johnson City, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T12:00",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "3TH"}
+    },
+    {
+      "summary": "IBN Evening Social — Bristol TN",
+      "location": "Tennessee Hills Distillery, 90 Tennessee Hills Way, Bristol, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T17:30",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "1TU"}
+    },
+    {
+      "summary": "IBN Evening Social — Bristol VA",
+      "location": "Lumac Rooftop Bar, Bristol Hotel, Bristol, VA",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T17:30",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "3WE"}
+    },
+    {
+      "summary": "IBN Evening Social — Johnson City TN",
+      "location": "Cafe Lola, Johnson City, TN",
+      "url": "https://incredibletowns.com/incredible-business-networking-tricities-tn/",
+      "starts_at": "2026-05-01T17:30",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "3TH"}
+    },
+    {
+      "summary": "Business Networking @ the BANQ",
+      "location": "BANQ Events, 255 Broad Street, Suite 200, Kingsport, TN",
+      "description": "Coffee, snacks, connections, and open networking, plus weekly overview and 60-second business introductions.",
+      "starts_at": "2026-05-05T09:00",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "weekly", "byday": ["TU"]}
+    },
+    {
+      "summary": "East Tennessee Community Networking",
+      "location": "Northeast Community Credit Union, 980 Jason Witten Way, Elizabethton, TN",
+      "starts_at": "2026-05-01T08:00",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "1WE"}
+    },
+    {
+      "summary": "ELEVATE — Kingsport Professional Networking",
+      "location": "HomeTrust Bank — Kingsport, 422 Broad Street, Kingsport, TN",
+      "description": "New Kingsport professional networking group.",
+      "starts_at": "2026-05-01T09:15",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "1WE"}
+    },
+    {
+      "summary": "BRN-TC — Business Referral Network Tri-Cities",
+      "location": "Hackler Hall, 201 West Summer Street, Greeneville, TN",
+      "description": "Business growth and fostering connections through networking and mutual referrals.",
+      "starts_at": "2026-05-01T08:30",
+      "duration_minutes": 60,
+      "recurrence": {"freq": "monthly", "byday": "1WE"}
+    },
+    {
+      "summary": "Senior Resource Network Lunch — Kingsport",
+      "location": "Chop House, 1704 N Eastman Rd, Kingsport, TN",
+      "description": "Healthcare professionals from senior healthcare market and supporting business professionals.",
+      "starts_at": "2026-05-01T11:30",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "2MO"}
+    },
+    {
+      "summary": "Health & Wealth Club",
+      "location": "Infinite Wealth, 707 East Elk Avenue, Suite 2, Elizabethton, TN",
+      "description": "Learn how to have a more abundant life.",
+      "starts_at": "2026-05-01T18:00",
+      "duration_minutes": 90,
+      "recurrence": {"freq": "monthly", "byday": "2SU"}
     }
   ]
 }

@@ -60,9 +60,10 @@ defmodule TricitiesEvents.Sources.Custom do
     tz = Map.get(spec, "timezone", @default_timezone)
 
     case parse_local(starts_at_str, tz) do
-      {:ok, base_start_utc} ->
+      {:ok, base_local} ->
         spec
-        |> recurrence_dates(base_start_utc)
+        |> recurrence_dates(base_local)
+        |> Enum.map(&DateTime.shift_zone!(&1, "Etc/UTC"))
         |> Enum.map(&build_event(spec, summary, &1))
 
       :error ->
@@ -126,13 +127,17 @@ defmodule TricitiesEvents.Sources.Custom do
   end
 
   # Window in which to generate candidate dates. Anchored on the later of
-  # `now` and `base_start` so series defined for the future still expand.
+  # `now` and `base_local` so series defined for the future still expand.
   # `until` clips it; `count`-bounded series widen to ensure we find enough.
-  defp recurrence_end(rec, base_start_utc, spec, count) do
+  # All math stays in `base_local`'s timezone for DST-stable wall clocks.
+  defp recurrence_end(rec, base_local, spec, count) do
+    tz = base_local.time_zone
+    now_local = DateTime.utc_now() |> DateTime.shift_zone!(tz)
+
     anchor =
-      if DateTime.compare(base_start_utc, DateTime.utc_now()) == :gt,
-        do: base_start_utc,
-        else: DateTime.utc_now()
+      if DateTime.compare(base_local, now_local) == :gt,
+        do: base_local,
+        else: now_local
 
     horizon_days =
       cond do
@@ -141,20 +146,15 @@ defmodule TricitiesEvents.Sources.Custom do
       end
 
     horizon = DateTime.add(anchor, horizon_days * 86_400, :second)
-    parse_until(rec["until"], horizon)
+    parse_until(rec["until"], horizon, tz)
   end
 
-  defp parse_until(nil, default), do: default
+  defp parse_until(nil, default, _tz), do: default
 
-  defp parse_until(date_str, default) do
+  defp parse_until(date_str, default, tz) do
     case Date.from_iso8601(date_str) do
-      {:ok, date} ->
-        date
-        |> DateTime.new!(~T[23:59:59], "America/New_York")
-        |> DateTime.shift_zone!("Etc/UTC")
-
-      _ ->
-        default
+      {:ok, date} -> DateTime.new!(date, ~T[23:59:59], tz)
+      _ -> default
     end
   end
 
@@ -275,15 +275,16 @@ defmodule TricitiesEvents.Sources.Custom do
     Date.add(date, -(Date.day_of_week(date) - 1))
   end
 
-  # Combine a date with the time-of-day of the base_start, in the same timezone,
-  # then shift to UTC.
-  defp apply_time(%Date{} = date, %DateTime{} = base_start) do
-    local = DateTime.shift_zone!(base_start, base_start.time_zone)
-    {:ok, dt} = DateTime.new(date, DateTime.to_time(local), local.time_zone)
-    DateTime.shift_zone!(dt, "Etc/UTC")
+  # Combine a date with the local time-of-day of base_local, staying in the
+  # original timezone. Each instance is wall-clock-stable across DST.
+  defp apply_time(%Date{} = date, %DateTime{} = base_local) do
+    {:ok, dt} = DateTime.new(date, DateTime.to_time(base_local), base_local.time_zone)
+    dt
   end
 
-  # Parse "YYYY-MM-DDTHH:MM" (with optional :SS) as local time in tz, return UTC.
+  # Parse "YYYY-MM-DDTHH:MM" (with optional :SS) as local time in tz.
+  # Returns a DateTime in `tz`, NOT shifted to UTC — the caller does the
+  # final shift after recurrence expansion to keep wall-clock stability.
   defp parse_local(str, tz) when is_binary(str) do
     normalized =
       case String.length(str) do
@@ -293,7 +294,7 @@ defmodule TricitiesEvents.Sources.Custom do
 
     with {:ok, naive} <- NaiveDateTime.from_iso8601(normalized),
          {:ok, local} <- DateTime.from_naive(naive, tz) do
-      {:ok, DateTime.shift_zone!(local, "Etc/UTC")}
+      {:ok, local}
     else
       _ -> :error
     end
