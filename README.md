@@ -2,6 +2,8 @@
 
 Pulls events from multiple Tri-Cities (TN/VA) Chamber of Commerce, networking, and entrepreneur organizations into a single subscribable iCal feed.
 
+Published at **[tricitiestnevents.com](https://tricitiestnevents.com)**.
+
 ## Sources
 
 | Source | Type | Status |
@@ -22,11 +24,15 @@ mix deps.get
 mix tricities.refresh
 ```
 
-Output is written to `priv/static/tricities-events.ics`. Host that file on any static service (Cloudflare Pages, GitHub Pages, S3, etc.) and people can subscribe via:
+Output is written to `priv/static/tricities-events.ics`.
+
+The published feed lives at https://tricitiestnevents.com — subscribe directly:
 
 ```
-webcal://your-host/tricities-events.ics
+webcal://tricitiestnevents.com/tricities-events.ics
 ```
+
+(Self-hosting: any static service works — Cloudflare Pages, GitHub Pages, S3, etc.)
 
 ## Architecture
 
