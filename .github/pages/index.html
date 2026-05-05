@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tri-Cities Events Calendar</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 36rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+    code { background: #f3f3f3; padding: 0.1em 0.4em; border-radius: 4px; word-break: break-all; }
+    .btn { display: inline-block; margin: 0.5rem 0.5rem 0.5rem 0; padding: 0.7rem 1.1rem; background: #0a66c2; color: #fff; text-decoration: none; border-radius: 6px; }
+    .btn.secondary { background: #444; }
+    h1 { margin-bottom: 0.25em; }
+    .muted { color: #666; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Tri-Cities Events Calendar</h1>
+  <p>An aggregated calendar of Chamber of Commerce, networking, and entrepreneur events across the Tri-Cities (TN/VA) region. Subscribe once and your calendar app keeps itself up to date.</p>
+  <p>
+    <a class="btn" id="sub" href="tricities-events.ics">Subscribe (webcal)</a>
+    <a class="btn secondary" href="tricities-events.ics">Download .ics</a>
+  </p>
+  <p>Or paste this URL into your calendar app:</p>
+  <p><code id="url"></code></p>
+  <p class="muted">Refreshed every 4 hours. <a href="https://github.com/zyzyva/tricities_events">Source on GitHub</a>.</p>
+  <script>
+    const httpsUrl = location.origin + location.pathname.replace(/index\.html$/, '') + 'tricities-events.ics';
+    const webcal = httpsUrl.replace(/^https?:/, 'webcal:');
+    document.getElementById('sub').href = webcal;
+    document.getElementById('url').textContent = httpsUrl;
+  </script>
+</body>
+</html>
