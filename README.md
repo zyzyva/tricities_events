@@ -42,6 +42,10 @@ webcal://tricitiestnevents.com/tricities-events.ics
 - **`TricitiesEvents.Region`** — fuzzy location filter for multi-region sources (e.g. Incredible Towns publishes nationally; we keep only Tri-Cities events)
 - **`TricitiesEvents.Aggregator`** — fans out to all sources in parallel, dedupes by `summary|starts_at|location`, drops past events, writes the master `.ics`
 
+## Adding hand-curated events
+
+For events that organizations don't publish on their own calendars (recurring breakfasts, monthly lunches, networking meetups), edit `priv/custom_events.json` and commit. Both one-off and recurring (weekly/monthly) entries are supported — see the comment block at the top of that file for the format.
+
 ## Adding a source
 
 1. Create `lib/tricities_events/sources/your_source.ex` implementing `TricitiesEvents.Source`

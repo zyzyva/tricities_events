@@ -1,0 +1,53 @@
+{
+  "_comment": [
+    "Hand-curated events that the upstream organizations don't publish on their own calendars.",
+    "Edit this file, commit, and push — GitHub Actions will pick up the change on the next refresh.",
+    "",
+    "Each entry has:",
+    "  summary           required, the event title",
+    "  starts_at         required, ISO local datetime: YYYY-MM-DDTHH:MM (no timezone — see `timezone`)",
+    "  duration_minutes  optional, used to compute end time",
+    "  location          optional",
+    "  description       optional",
+    "  url               optional",
+    "  timezone          optional, defaults to America/New_York",
+    "  recurrence        optional — see below",
+    "",
+    "Recurrence shapes:",
+    "  Weekly on specific weekdays:",
+    "    {\"freq\": \"weekly\", \"byday\": [\"WE\"], \"count\": 26}",
+    "  Weekly on multiple days:",
+    "    {\"freq\": \"weekly\", \"byday\": [\"TU\", \"TH\"], \"until\": \"2026-12-31\"}",
+    "  Monthly on a specific day-of-month:",
+    "    {\"freq\": \"monthly\", \"bymonthday\": 15}",
+    "  Monthly on the Nth weekday (1TU = first Tuesday, 2WE = second Wednesday, -1FR = last Friday):",
+    "    {\"freq\": \"monthly\", \"byday\": \"1TU\"}",
+    "",
+    "Stop conditions: `until` (inclusive end date) or `count` (max occurrences). Without either,",
+    "the series expands for ~365 days from now."
+  ],
+  "events": [
+    {
+      "summary": "Eggs & Issues — Kingsport Chamber breakfast",
+      "location": "MeadowView Conference Resort & Convention Center, Kingsport, TN",
+      "description": "Monthly Kingsport Chamber breakfast featuring local and regional speakers.",
+      "starts_at": "2026-05-21T07:30",
+      "duration_minutes": 90,
+      "recurrence": {
+        "freq": "monthly",
+        "byday": "3TH"
+      }
+    },
+    {
+      "summary": "Tri-Cities Founders Coffee",
+      "location": "Dunkin', Johnson City",
+      "description": "Informal weekly coffee meetup for founders and operators in the Tri-Cities region.",
+      "starts_at": "2026-05-13T07:30",
+      "duration_minutes": 60,
+      "recurrence": {
+        "freq": "weekly",
+        "byday": ["WE"]
+      }
+    }
+  ]
+}

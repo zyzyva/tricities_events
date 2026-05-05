@@ -13,7 +13,8 @@ defmodule TricitiesEvents.Aggregator do
     TricitiesEvents.Sources.ElizabethtonChamber,
     TricitiesEvents.Sources.IncredibleTowns,
     TricitiesEvents.Sources.UnicoiChamber,
-    TricitiesEvents.Sources.FoundersForge
+    TricitiesEvents.Sources.FoundersForge,
+    TricitiesEvents.Sources.Custom
   ]
 
   @output_path "priv/static/tricities-events.ics"
