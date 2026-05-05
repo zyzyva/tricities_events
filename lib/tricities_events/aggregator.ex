@@ -14,6 +14,7 @@ defmodule TricitiesEvents.Aggregator do
     TricitiesEvents.Sources.IncredibleTowns,
     TricitiesEvents.Sources.UnicoiChamber,
     TricitiesEvents.Sources.FoundersForge,
+    TricitiesEvents.Sources.JohnsonCityChamber,
     TricitiesEvents.Sources.Custom
   ]
 

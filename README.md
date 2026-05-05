@@ -12,7 +12,7 @@ Published at **[tricitiestnevents.com](https://tricitiestnevents.com)**.
 | Incredible Towns / IBN | iCal feed (MEC) — region-filtered | ✅ |
 | Unicoi County Chamber | iCal feed (Tribe) | ⚠️ Plugin currently misbehaving server-side |
 | FoundersForge | HTML scrape | ✅ |
-| Johnson City Chamber | ChamberMaster | TODO — needs scraper |
+| Johnson City Chamber | CC-Assist.NET HTML scrape | ✅ |
 | Kingsport Chamber | ChamberMaster | TODO |
 | Bristol Chamber | ChamberMaster | TODO |
 | Greene County Partnership | ChamberMaster | TODO |

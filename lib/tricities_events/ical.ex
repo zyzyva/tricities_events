@@ -23,7 +23,8 @@ defmodule TricitiesEvents.ICal do
     "Elizabethton Chamber" => "Eliz Chamber",
     "Incredible Towns" => "Incredible Towns",
     "Unicoi County Chamber" => "Unicoi Chamber",
-    "FoundersForge" => "Founders Forge"
+    "FoundersForge" => "Founders Forge",
+    "Johnson City Chamber" => "JC Chamber"
   }
 
   @doc "Parse a raw iCal document into a list of %Event{} structs."
