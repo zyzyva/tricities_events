@@ -55,6 +55,9 @@ defmodule TricitiesEvents.ICal do
     #{body}
     END:VCALENDAR
     """
+    # `body` already uses CRLF; collapse to LF first so we don't double-convert
+    # existing CRLF into CR-CR-LF, then normalize the whole doc to CRLF.
+    |> String.replace("\r\n", "\n")
     |> String.replace("\n", "\r\n")
     |> String.trim_trailing("\r\n")
     |> Kernel.<>("\r\n")
@@ -79,11 +82,17 @@ defmodule TricitiesEvents.ICal do
   defp extract_vevent_blocks(lines) do
     {blocks, _current} =
       Enum.reduce(lines, {[], nil}, fn
-        "BEGIN:VEVENT", {acc, nil} -> {acc, ["BEGIN:VEVENT"]}
+        "BEGIN:VEVENT", {acc, nil} ->
+          {acc, ["BEGIN:VEVENT"]}
+
         "END:VEVENT", {acc, current} when is_list(current) ->
           {[Enum.reverse(["END:VEVENT" | current]) | acc], nil}
-        line, {acc, current} when is_list(current) -> {acc, [line | current]}
-        _line, {acc, nil} -> {acc, nil}
+
+        line, {acc, current} when is_list(current) ->
+          {acc, [line | current]}
+
+        _line, {acc, nil} ->
+          {acc, nil}
       end)
 
     blocks |> Enum.reverse()
@@ -103,10 +112,13 @@ defmodule TricitiesEvents.ICal do
         location: unescape(fields["LOCATION"]),
         url: fields["URL"],
         starts_at: starts_at,
-        ends_at: fields["DTEND"] |> parse_dt() |> case do
-          {:ok, dt} -> dt
-          _ -> nil
-        end,
+        ends_at:
+          fields["DTEND"]
+          |> parse_dt()
+          |> case do
+            {:ok, dt} -> dt
+            _ -> nil
+          end,
         vevent_block: raw_block
       }
     else
@@ -128,9 +140,11 @@ defmodule TricitiesEvents.ICal do
   # Parse an iCal DTSTART/DTEND value into a UTC DateTime.
   # Handles UTC suffix Z, floating local times, and TZID-prefixed values.
   defp parse_dt(nil), do: :error
-  defp parse_dt(<<year::binary-size(4), month::binary-size(2), day::binary-size(2),
-                  "T", hour::binary-size(2), min::binary-size(2), sec::binary-size(2),
-                  "Z">>) do
+
+  defp parse_dt(
+         <<year::binary-size(4), month::binary-size(2), day::binary-size(2), "T",
+           hour::binary-size(2), min::binary-size(2), sec::binary-size(2), "Z">>
+       ) do
     DateTime.new(
       Date.new!(String.to_integer(year), String.to_integer(month), String.to_integer(day)),
       Time.new!(String.to_integer(hour), String.to_integer(min), String.to_integer(sec)),
@@ -138,8 +152,10 @@ defmodule TricitiesEvents.ICal do
     )
   end
 
-  defp parse_dt(<<year::binary-size(4), month::binary-size(2), day::binary-size(2),
-                  "T", hour::binary-size(2), min::binary-size(2), sec::binary-size(2)>>) do
+  defp parse_dt(
+         <<year::binary-size(4), month::binary-size(2), day::binary-size(2), "T",
+           hour::binary-size(2), min::binary-size(2), sec::binary-size(2)>>
+       ) do
     # Floating/local time — assume America/New_York (all our sources are ET)
     DateTime.new(
       Date.new!(String.to_integer(year), String.to_integer(month), String.to_integer(day)),
@@ -191,7 +207,9 @@ defmodule TricitiesEvents.ICal do
 
   defp event_to_vevent(%Event{vevent_block: block, source: source})
        when is_binary(block) and block != "" do
-    apply_tag_to_block(block, Map.get(@source_tags, source))
+    block
+    |> apply_tag_to_block(Map.get(@source_tags, source))
+    |> ensure_x_source(source)
   end
 
   defp event_to_vevent(%Event{} = event) do
@@ -214,6 +232,16 @@ defmodule TricitiesEvents.ICal do
     lines
     |> Enum.reject(&is_nil/1)
     |> Enum.join("\r\n")
+  end
+
+  # Passthrough iCal feeds don't carry our X-SOURCE marker; inject one (before
+  # END:VEVENT) so every event in the master feed is filterable by source.
+  defp ensure_x_source(block, source) do
+    if Regex.match?(~r/^X-SOURCE:/m, block) do
+      block
+    else
+      String.replace(block, ~r/END:VEVENT\s*$/, "X-SOURCE:#{source}\r\nEND:VEVENT")
+    end
   end
 
   defp apply_tag(summary, nil), do: summary

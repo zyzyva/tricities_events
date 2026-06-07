@@ -47,11 +47,41 @@ defmodule TricitiesEvents.Aggregator do
     output_path |> Path.dirname() |> File.mkdir_p!()
     File.write!(output_path, ics)
 
+    manifest_path = write_manifest(all_events, output_path)
+
     %{
       total_events: length(all_events),
       sources: Enum.map(results, &Map.delete(&1, :events)),
-      output_path: output_path
+      output_path: output_path,
+      manifest_path: manifest_path
     }
+  end
+
+  # Emit sources.json next to the .ics: the list of sources actually present in
+  # the published feed (with a URL-safe slug + future-event count). The website's
+  # source-picker reads this to build its checkboxes, so new sources appear
+  # automatically. The Pages function filters /feed.ics by these same slugs.
+  defp write_manifest(events, output_path) do
+    sources =
+      events
+      |> Enum.group_by(& &1.source)
+      |> Enum.map(fn {name, evs} ->
+        %{slug: source_slug(name), name: name, count: length(evs)}
+      end)
+      |> Enum.sort_by(& &1.name)
+
+    manifest = %{updated: DateTime.utc_now() |> DateTime.to_iso8601(), sources: sources}
+    path = Path.join(Path.dirname(output_path), "sources.json")
+    File.write!(path, JSON.encode!(manifest))
+    path
+  end
+
+  @doc "URL-safe source slug (must match the slugify in functions/feed.ics.js)."
+  def source_slug(name) do
+    name
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9]+/, "-")
+    |> String.trim("-")
   end
 
   defp fetch_with_report(source_module) do

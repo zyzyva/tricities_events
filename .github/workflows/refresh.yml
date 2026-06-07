@@ -41,9 +41,12 @@ jobs:
         run: |
           mkdir -p _site
           cp priv/static/tricities-events.ics _site/tricities-events.ics
+          cp priv/static/sources.json _site/sources.json
           cp .github/pages/index.html _site/index.html
           # Cloudflare Pages serves _headers/_redirects from the deploy root
           cp .github/pages/_headers _site/_headers
+          # Pages auto-detects a functions/ dir in the deploy root (serves /feed.ics)
+          cp -r .github/pages/functions _site/functions
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

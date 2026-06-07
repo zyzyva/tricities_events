@@ -4,30 +4,126 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Tri-Cities Events Calendar</title>
+  <!-- Analytics / retargeting tags go here later (GA4, Meta Pixel) so local
+       businesses can retarget visitors. Intentionally empty for now. -->
   <style>
-    body { font-family: -apple-system, system-ui, sans-serif; max-width: 36rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
     code { background: #f3f3f3; padding: 0.1em 0.4em; border-radius: 4px; word-break: break-all; }
     .btn { display: inline-block; margin: 0.5rem 0.5rem 0.5rem 0; padding: 0.7rem 1.1rem; background: #0a66c2; color: #fff; text-decoration: none; border-radius: 6px; }
     .btn.secondary { background: #444; }
+    .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
     h1 { margin-bottom: 0.25em; }
+    h2 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
     .muted { color: #666; font-size: 0.9em; }
+    fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 0.5rem 1rem 1rem; }
+    .src { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
+    .src label { flex: 1; }
+    .src .count { color: #888; font-size: 0.85em; }
+    .controls { font-size: 0.85em; }
+    .controls a { color: #0a66c2; cursor: pointer; text-decoration: underline; }
+    .ad-slot { border: 1px dashed #ccc; border-radius: 8px; padding: 1rem; text-align: center; color: #aaa; margin: 2rem 0; font-size: 0.85em; }
   </style>
 </head>
 <body>
   <h1>Tri-Cities Events Calendar</h1>
-  <p>An aggregated calendar of Chamber of Commerce, networking, and entrepreneur events across the Tri-Cities (TN/VA) region. Subscribe once and your calendar app keeps itself up to date.</p>
+  <p>An aggregated calendar of Chamber of Commerce, networking, and entrepreneur events across the Tri-Cities (TN/VA) region. Pick the sources you want, subscribe once, and your calendar app keeps itself up to date.</p>
+
+  <h2>Choose your sources</h2>
+  <p class="controls"><a id="all">Select all</a> &nbsp;·&nbsp; <a id="none">Clear</a></p>
+  <fieldset id="sources"><p class="muted">Loading sources…</p></fieldset>
+
   <p>
-    <a class="btn" id="sub" href="tricities-events.ics">Subscribe (webcal)</a>
-    <a class="btn secondary" href="tricities-events.ics">Download .ics</a>
+    <a class="btn" id="sub" href="#">Subscribe (webcal)</a>
+    <a class="btn secondary" id="dl" href="#" download>Download .ics</a>
   </p>
   <p>Or paste this URL into your calendar app:</p>
   <p><code id="url"></code></p>
+
+  <!-- Local advertising slot — sponsored placement for area businesses. -->
+  <aside class="ad-slot">Your local business here</aside>
+
   <p class="muted">Refreshed every 4 hours. <a href="https://github.com/zyzyva/tricities_events">Source on GitHub</a>.</p>
+
   <script>
-    const httpsUrl = location.origin + location.pathname.replace(/index\.html$/, '') + 'tricities-events.ics';
-    const webcal = httpsUrl.replace(/^https?:/, 'webcal:');
-    document.getElementById('sub').href = webcal;
-    document.getElementById('url').textContent = httpsUrl;
+    const fieldset = document.getElementById("sources");
+    const subBtn = document.getElementById("sub");
+    const dlBtn = document.getElementById("dl");
+    const urlCode = document.getElementById("url");
+    let sources = [];
+
+    function selectedSlugs() {
+      return [...fieldset.querySelectorAll("input:checked")].map((c) => c.value);
+    }
+
+    function updateLinks() {
+      const checked = selectedSlugs();
+      const all = sources.length > 0 && checked.length === sources.length;
+
+      let path, enabled = true;
+      if (checked.length === 0) {
+        path = "/feed.ics?sources=";
+        enabled = false;
+      } else if (all) {
+        path = "/tricities-events.ics"; // everything → plain master feed
+      } else {
+        path = "/feed.ics?sources=" + checked.join(",");
+      }
+
+      const https = location.origin + path;
+      const webcal = https.replace(/^https?:/, "webcal:");
+      subBtn.href = enabled ? webcal : "#";
+      subBtn.setAttribute("aria-disabled", String(!enabled));
+      dlBtn.href = enabled ? https : "#";
+      dlBtn.setAttribute("aria-disabled", String(!enabled));
+      urlCode.textContent = enabled ? https : "select at least one source";
+    }
+
+    function render() {
+      fieldset.replaceChildren();
+      sources.forEach((s) => {
+        const row = document.createElement("div");
+        row.className = "src";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = "src-" + s.slug;
+        input.value = s.slug;
+        input.checked = true;
+
+        const label = document.createElement("label");
+        label.htmlFor = input.id;
+        label.textContent = s.name; // textContent — no HTML injection from source names
+
+        const count = document.createElement("span");
+        count.className = "count";
+        count.textContent = s.count;
+
+        row.append(input, label, count);
+        fieldset.appendChild(row);
+      });
+      fieldset.addEventListener("change", updateLinks);
+      updateLinks();
+    }
+
+    document.getElementById("all").onclick = () => {
+      fieldset.querySelectorAll("input").forEach((c) => (c.checked = true));
+      updateLinks();
+    };
+    document.getElementById("none").onclick = () => {
+      fieldset.querySelectorAll("input").forEach((c) => (c.checked = false));
+      updateLinks();
+    };
+
+    fetch("/sources.json", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        sources = data.sources || [];
+        render();
+      })
+      .catch(() => {
+        fieldset.innerHTML =
+          '<p class="muted">Couldn\'t load sources — <a href="/tricities-events.ics">subscribe to everything</a>.</p>';
+      });
   </script>
 </body>
 </html>
