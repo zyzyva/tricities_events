@@ -40,22 +40,39 @@ defmodule TricitiesEvents.Newsletter.Extractor do
     member spotlights, and generic marketing. If nothing qualifies, return [].
   """
 
+  @doc "Full extraction: {:ok, [%Event{}]} | {:error, reason}."
   def extract(%{} = email) do
+    with {:ok, items} <- extract_items(email) do
+      {:ok, to_events(items, email)}
+    end
+  end
+
+  @doc """
+  The expensive half (Groq calls) — returns the raw deduped item maps so they can
+  be cached per email. {:ok, [item_map]} on success (possibly empty), {:error, _}
+  on failure (so callers don't cache a transient failure).
+  """
+  def extract_items(%{} = email) do
     case api_key() do
       {:ok, key} ->
-        events =
+        items =
           email
           |> image_batches()
           |> Enum.flat_map(&extract_batch(email, &1, key))
           |> dedupe_items()
-          |> Enum.map(&to_event(&1, email))
-          |> Enum.reject(&is_nil/1)
 
-        {:ok, events}
+        {:ok, items}
 
       err ->
         err
     end
+  end
+
+  @doc "The cheap, deterministic half — map cached/fresh items to %Event{} structs."
+  def to_events(items, email) when is_list(items) do
+    items
+    |> Enum.map(&to_event(&1, email))
+    |> Enum.reject(&is_nil/1)
   end
 
   # Chunk embedded images into ≤5-image batches (model limit); one text-only batch

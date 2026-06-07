@@ -25,3 +25,4 @@ tricities_events-*.tar
 # Generated calendar artifact (rebuilt by `mix tricities.refresh`)
 /priv/static/tricities-events.ics
 
+priv/newsletter_cache.json

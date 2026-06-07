@@ -104,6 +104,7 @@ defmodule TricitiesEvents.Newsletter.Jmap do
     html = part_value(email["htmlBody"], body_values)
 
     %{
+      id: email["id"],
       source: source_of(text <> html),
       subject: clean_subject(email["subject"]),
       received_at: email["receivedAt"],
