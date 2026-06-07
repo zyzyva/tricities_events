@@ -55,13 +55,18 @@ defmodule TricitiesEvents.Newsletter.Extractor do
   def extract_items(%{} = email) do
     case api_key() do
       {:ok, key} ->
-        items =
-          email
-          |> image_batches()
-          |> Enum.flat_map(&extract_batch(email, &1, key))
-          |> dedupe_items()
+        results = Enum.map(image_batches(email), &extract_batch(email, &1, key))
 
-        {:ok, items}
+        case Enum.find(results, &match?({:error, _}, &1)) do
+          nil ->
+            items = results |> Enum.flat_map(fn {:ok, items} -> items end) |> dedupe_items()
+            {:ok, items}
+
+          {:error, reason} ->
+            # An API failure (e.g. 429 after retries exhausted) — fail the whole
+            # email so a partial result is never cached as complete. Retries next run.
+            {:error, reason}
+        end
 
       err ->
         err
@@ -86,11 +91,16 @@ defmodule TricitiesEvents.Newsletter.Extractor do
   end
 
   defp extract_batch(email, image_urls, key) do
-    with {:ok, content} <- call_groq(email, image_urls, key),
-         {:ok, items} <- parse(content) do
-      items
-    else
-      _ -> []
+    case call_groq(email, image_urls, key) do
+      {:ok, content} ->
+        case parse(content) do
+          {:ok, items} -> {:ok, items}
+          # Model returned no parseable array — treat as "no events", not a failure.
+          {:error, _} -> {:ok, []}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -133,7 +143,10 @@ defmodule TricitiesEvents.Newsletter.Extractor do
            json: body,
            headers: [{"authorization", "Bearer #{key}"}],
            receive_timeout: 90_000,
-           retry: :transient
+           # :transient retries 429/5xx/transport errors with backoff, honoring the
+           # Retry-After header Groq sends on 429.
+           retry: :transient,
+           max_retries: 5
          ) do
       {:ok, %{status: 200, body: %{"choices" => [%{"message" => %{"content" => c}} | _]}}} ->
         {:ok, c}
