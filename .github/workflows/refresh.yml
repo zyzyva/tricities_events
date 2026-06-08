@@ -58,8 +58,8 @@ jobs:
           cp .github/pages/index.html _site/index.html
           # Cloudflare Pages serves _headers/_redirects from the deploy root
           cp .github/pages/_headers _site/_headers
-          # Pages auto-detects a functions/ dir in the deploy root (serves /feed)
-          cp -r .github/pages/functions _site/functions
+          # Pages advanced mode: _worker.js in the deploy root handles /feed filtering
+          cp .github/pages/_worker.js _site/_worker.js
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
