@@ -42,28 +42,26 @@ defmodule TricitiesEvents.Sources.Newsletter do
     end
   end
 
-  # Use cached extraction for seen emails; run Groq only on new ones. Persist the
-  # merged cache, pruned to this run's emails so it can't grow unbounded. Failed
-  # extractions are NOT cached, so they retry next run.
+  # Use cached extraction for seen emails; run Groq only on new ones. The cache is
+  # pruned up front to this run's emails (can't grow unbounded) and persisted after
+  # EACH successful extraction — so partial progress survives a timeout. That
+  # matters in CI, where the cache starts cold and the source may be killed at the
+  # aggregator's per-source timeout; it then self-heals over subsequent runs.
+  # Failed extractions are not cached, so they retry.
   defp resolve_items(emails) do
-    cache = Cache.load()
+    base = Cache.load() |> Map.take(Enum.map(emails, & &1.id))
 
-    fresh =
-      emails
-      |> Enum.reject(&Map.has_key?(cache, &1.id))
-      |> Task.async_stream(fn e -> {e.id, Extractor.extract_items(e)} end,
-        max_concurrency: @concurrency,
-        timeout: 80_000,
-        on_timeout: :kill_task
-      )
-      |> Enum.flat_map(fn
-        {:ok, {id, {:ok, items}}} -> [{id, items}]
-        _ -> []
-      end)
-      |> Map.new()
-
-    keep = Map.take(cache, Enum.map(emails, & &1.id))
-    Map.merge(keep, fresh) |> Cache.save()
+    emails
+    |> Enum.reject(&Map.has_key?(base, &1.id))
+    |> Task.async_stream(fn e -> {e.id, Extractor.extract_items(e)} end,
+      max_concurrency: @concurrency,
+      timeout: 80_000,
+      on_timeout: :kill_task
+    )
+    |> Enum.reduce(base, fn
+      {:ok, {id, {:ok, items}}}, acc -> acc |> Map.put(id, items) |> Cache.save()
+      _, acc -> acc
+    end)
   end
 
   # Collapse the same event arriving from two newsletters under different titles

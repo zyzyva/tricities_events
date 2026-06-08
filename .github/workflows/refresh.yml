@@ -34,8 +34,21 @@ jobs:
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-
 
+      # Persist the newsletter extraction cache across runs. Unique key always
+      # saves a fresh entry; restore-keys pulls the most recent prior cache so
+      # Groq only runs on new mail (and partial cold-start progress carries over).
+      - name: Restore newsletter cache
+        uses: actions/cache@v4
+        with:
+          path: priv/newsletter_cache.json
+          key: newsletter-cache-${{ github.run_id }}
+          restore-keys: newsletter-cache-
+
       - run: mix deps.get
       - run: MIX_ENV=prod mix tricities.refresh
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FASTMAIL_API_TOKEN: ${{ secrets.FASTMAIL_API_TOKEN }}
 
       - name: Stage site
         run: |
