@@ -1,5 +1,6 @@
-// Cloudflare Pages Function — serves the Tri-Cities .ics, optionally filtered to
-// selected sources via  /feed.ics?sources=slug1,slug2
+// Cloudflare Pages Function (route: /feed) — serves the Tri-Cities calendar,
+// optionally filtered to selected sources via  /feed?sources=slug1,slug2
+// (Content-Type drives calendar apps; downloads still get a .ics filename.)
 //
 // Slugs are the source slugs from sources.json (and X-SOURCE on each VEVENT). The
 // slugify here MUST match Aggregator.source_slug/1 in the Elixir app.

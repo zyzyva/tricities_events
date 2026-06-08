@@ -61,12 +61,12 @@
 
       let path, enabled = true;
       if (checked.length === 0) {
-        path = "/feed.ics?sources=";
+        path = "/feed?sources=";
         enabled = false;
       } else if (all) {
         path = "/tricities-events.ics"; // everything → plain master feed
       } else {
-        path = "/feed.ics?sources=" + checked.join(",");
+        path = "/feed?sources=" + checked.join(",");
       }
 
       const https = location.origin + path;
